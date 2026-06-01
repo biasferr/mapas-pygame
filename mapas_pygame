@@ -1,0 +1,5 @@
+from pygame import *
+import sys
+
+
+window = display.set_mode(736,640)        
