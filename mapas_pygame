@@ -1,5 +1,92 @@
 from pygame import *
 import sys
 
+#CORES
+fundo = (57, 56, 82)
 
-window = display.set_mode(736,640)        
+clock = time.Clock()
+init()
+window = display.set_mode((480,320))  
+window.fill(fundo)
+#15 colunas
+#10 linhas 
+
+tileset = image.load('Kings and Pigs/Sprites/14-TileSets/Terrain (32x32).png')
+tilesize = 32
+
+decoracoes = image.load('Kings and Pigs/Sprites/14-TileSets/Decorations (32x32).png')
+porta = image.load('Kings and Pigs/Sprites/11-Door/Idle.png')
+
+
+    # 1     2      3       4       5       6       7       8       9    10        11      12      13      14      15  
+mapa = [
+    ['f',  'f',  'f',     'f',   'f',    'cse',   'bs',   'bs',   'bs',   'bs',   'bs',   'bs',   'bs',   'csd',  'f'],
+    ['f', 'cse', 'bs',    'bs', 'bs',    'cur_ie','tcse',  'tbs',  'tbs',  'tbs',  'tbs',  'tbs',  'tcsd', 'bld',  'f'],
+    ['f',  'ble','tcse',  'tbs', 'tbs', 'tbs',    'cur_iet',    't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
+    ['f',  'ble','tble',  't',   't',     't',    't',    't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
+    ['f',  'ble','tble',  't',   't',     't',    't',    't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
+    ['f',  'ble','tble',  't',   't',     't',    't',    't','cur_sdt','tbi',  'tbi',   'tbi',   'tcid', 'bld',  'f'],
+    ['f',  'ble','tble',  't',   't', 'cur_sdt',  'tbi',  'tbi', 'tcid', 'cur_sd', 'bi',    'bi',    'bi', 'cid',  'f'],
+    ['f',  'ble','tble',  't',   't',   'tbld','cur_sd','bi',  'bi',  'cid'],
+    ['f',  'ble','tcie', 'tbi', 'tbi',  'tcid','bld'],
+    ['f',  'cie', 'bi',   'bi',  'bi',  'bi',   'cid',  'f']
+]
+
+
+# DICIONÁRIO DE BLOCOS 
+blocos = {
+    'cse':    (224, 32),
+    'bs':     (64, 96),
+    'csd':    (256, 32),
+    'ble':    (96, 64),
+    'tcse':   (32, 224),
+    'tbs':    (64, 224),
+    'tcsd':   (96, 224),
+    'bld':    (32, 64),
+    'tble':   (32, 256),
+    't':      (64, 256),
+    'tbld':   (96, 256),
+    'tcie':   (32, 288),
+    'tbi':    (64, 288),
+    'tcid':   (96, 288),
+    'cie':    (224, 64),
+    'bi':     (64, 32),
+    'cid':    (256, 64),
+    'rs':     (160, 32),
+    'cur_sd': (32, 32),
+    'cur_ie': (96, 96),
+    'cur_sdt': (224,224),
+    'cur_iet' : (256,256)
+}
+
+
+
+
+
+while True:
+    for ev in event.get():
+        if ev.type == QUIT:
+            quit()
+            sys.exit()
+
+    clock.tick(60)
+    dt = clock.get_time()
+
+#DESENHANDO MAPA
+    for i in range(len(mapa)):
+        for j in range(len(mapa[i])):
+            tile = mapa[i][j]
+            if tile == 'f':
+                draw.rect(window,fundo, (tilesize * j, tilesize* i, tilesize, tilesize))
+            
+            else: 
+                coordenada = blocos.get(tile)
+                if coordenada:
+                    window.blit(tileset,(tilesize * j, tilesize*i),(coordenada[0],coordenada[1],tilesize,tilesize))
+
+#DECORAÇÃO
+    janela = window.blit(decoracoes,(96,96),(73,102,35,44))
+    window.blit(porta, (70,234))
+    plataforma = window.blit(decoracoes,(160,256),(160,30,32,10))
+
+    display.update()
