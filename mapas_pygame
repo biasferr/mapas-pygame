@@ -11,23 +11,26 @@ window.fill(fundo)
 #15 colunas
 #10 linhas 
 
+#MAPAAAAAAAAAA
 tileset = image.load('Kings and Pigs/Sprites/14-TileSets/Terrain (32x32).png')
 tilesize = 32
 
 decoracoes = image.load('Kings and Pigs/Sprites/14-TileSets/Decorations (32x32).png')
 porta = image.load('Kings and Pigs/Sprites/11-Door/Idle.png')
+caixa = image.load('Kings and Pigs/Sprites/08-Box/Idle.png')
+caixa_maior = transform.scale(caixa,(44,32))
 
 
     # 1     2      3       4       5       6       7       8       9    10        11      12      13      14      15  
 mapa = [
     ['f',  'f',  'f',     'f',   'f',    'cse',   'bs',   'bs',   'bs',   'bs',   'bs',   'bs',   'bs',   'csd',  'f'],
     ['f', 'cse', 'bs',    'bs', 'bs',    'cur_ie','tcse',  'tbs',  'tbs',  'tbs',  'tbs',  'tbs',  'tcsd', 'bld',  'f'],
-    ['f',  'ble','tcse',  'tbs', 'tbs', 'tbs',    'cur_iet',    't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
-    ['f',  'ble','tble',  't',   't',     't',    't',    't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
-    ['f',  'ble','tble',  't',   't',     't',    't',    't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
-    ['f',  'ble','tble',  't',   't',     't',    't',    't','cur_sdt','tbi',  'tbi',   'tbi',   'tcid', 'bld',  'f'],
+    ['f',  'ble','tcse',  'tbs', 'tbs', 'tbs',  'cur_iet', 't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
+    ['f',  'ble','tble',  't',   't',     't',    't',     't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
+    ['f',  'ble','tble',  't',   't',     't',    't',     't',    't',    't',    't',    't',    'tbld', 'bld',  'f'],
+    ['f',  'ble','tble',  't',   't',     't',    't',     't', 'cur_sdt','tbi',  'tbi',   'tbi',   'tcid', 'bld',  'f'],
     ['f',  'ble','tble',  't',   't', 'cur_sdt',  'tbi',  'tbi', 'tcid', 'cur_sd', 'bi',    'bi',    'bi', 'cid',  'f'],
-    ['f',  'ble','tble',  't',   't',   'tbld','cur_sd','bi',  'bi',  'cid'],
+    ['f',  'ble','tble',  't',   't',   'tbld','cur_sd',   'bi',  'bi',  'cid'],
     ['f',  'ble','tcie', 'tbi', 'tbi',  'tcid','bld'],
     ['f',  'cie', 'bi',   'bi',  'bi',  'bi',   'cid',  'f']
 ]
@@ -60,17 +63,106 @@ blocos = {
 }
 
 
+obstaculos = []
 
 
+
+#ANIMAÇÃO!!!!!!!
+idle = image.load('tiny hero/1 Pink_Monster/Pink_Monster_Idle_4.png')
+frame_atual_idle = 0
+anim_time_idle = 0
+
+walk_right = image.load('tiny hero/1 Pink_Monster/Pink_Monster_Walk_6.png')
+frame_atual_walkRight = 0
+anim_time_walkRight = 0
+
+walk_left = image.load('tiny hero/1 Pink_Monster/Pink_Monster_WalkLeft_6.png')
+frame_atual_walkLeft = 0
+anim_time_walkLeft = 0
+
+
+jump = image.load('tiny hero/1 Pink_Monster/Pink_Monster_Jump_8.png')
+frame_atual_jump = 0
+anim_time_jump = 0
+
+
+pink_monster_x = 96
+pink_monster_y = 150
+vel_pink_monster = 14
+andar = False
+pular = False
+vel_y = 0
+gravidade = 0.8
+
+
+#COLISAO:
+#DESENHANDO MAPA
+for i in range(len(mapa)):
+    for j in range(len(mapa[i])):
+        tile = mapa[i][j]
+        #ONDE PODE ANDAR
+        if tile!= 'f' and not 't' in tile:
+            novo_rect = Rect(j* tilesize, i* tilesize, tilesize, tilesize)
+            draw.rect(window,(225,0,0),novo_rect,2)
+            obstaculos.append(novo_rect)
+            
+#COLLIDER DAS CAIXAS    
+obstaculos.append(Rect(150,256,44,32))
+obstaculos.append(Rect(267,208,22,16))
+obstaculos.append(Rect(130,272,22,16)) 
+obstaculos.append(Rect(170,240,22,16))   
 
 while True:
     for ev in event.get():
         if ev.type == QUIT:
             quit()
             sys.exit()
+        if (ev.type == KEYDOWN and pular == False):
+            if ev.key == K_SPACE:
+                pular = True
+                vel_y = -16
 
     clock.tick(60)
     dt = clock.get_time()
+
+    old_pink_monster_x = pink_monster_x
+    old_pink_monster_y = pink_monster_y
+
+    keys = key.get_pressed()
+
+    andar_direita = keys[K_RIGHT]
+    andar_esquerda = keys[K_LEFT]
+
+    if pink_monster_y > 255:
+        pink_monster_y = pink_monster_y + vel_y*(dt/100)
+        vel_y += gravidade
+
+    if andar_direita:
+        pink_monster_x = pink_monster_x + vel_pink_monster/100 * dt
+    
+    if andar_esquerda:
+        pink_monster_x = pink_monster_x - vel_pink_monster/100 *dt
+
+    if pular:
+        pink_monster_y = pink_monster_y + vel_y*(dt/100)
+        vel_y += gravidade
+
+    pink_monster_collider = Rect(pink_monster_x+4,pink_monster_y,22,32)
+
+
+    for obstaculo in obstaculos:
+        if pink_monster_collider.colliderect(obstaculo):
+            pink_monster_x = old_pink_monster_x
+            pink_monster_y = old_pink_monster_y
+
+            if vel_y > 0:
+                vel_y = 0
+                pular = False
+            
+    
+
+               
+
 
 #DESENHANDO MAPA
     for i in range(len(mapa)):
@@ -78,15 +170,100 @@ while True:
             tile = mapa[i][j]
             if tile == 'f':
                 draw.rect(window,fundo, (tilesize * j, tilesize* i, tilesize, tilesize))
-            
+
             else: 
                 coordenada = blocos.get(tile)
                 if coordenada:
                     window.blit(tileset,(tilesize * j, tilesize*i),(coordenada[0],coordenada[1],tilesize,tilesize))
 
+            
+
 #DECORAÇÃO
     janela = window.blit(decoracoes,(96,96),(73,102,35,44))
     window.blit(porta, (70,234))
-    plataforma = window.blit(decoracoes,(160,256),(160,30,32,10))
+    window.blit(caixa_maior, (150,256))
+    window.blit(caixa, (267,208))
+    window.blit(caixa, (130,272))
+    window.blit(caixa, (170,240))
+
+    
+
+#ANIMAÇÃO
+    anim_time_jump = anim_time_jump + dt
+    anim_time_jump_set = anim_time_jump/1000
+
+
+    if pular == True:
+        pink_monster_y += vel_y * (dt /100)
+        vel_y += gravidade
+
+        if pink_monster_y >= 255:
+            pink_monster_y = 255
+            pular = False
+            vel_y = 0
+            frame_atual_jump = 0
+
+    if andar_direita:
+        pink_monster_x = pink_monster_x + vel_pink_monster * (dt/100)
+
+        anim_time_walkRight = anim_time_walkRight + dt
+        anim_time_walkRight_set = anim_time_walkRight/1000
+
+        if anim_time_walkRight_set > 0.15:
+            frame_atual_walkRight += 1
+            if frame_atual_walkRight > 5:
+                frame_atual_walkRight = 0
+            anim_time_walkRight = 0
+        
+        window.blit(walk_right, (pink_monster_x,pink_monster_y), ((frame_atual_walkRight *32),0, 32,32))
+
+    elif andar_esquerda == True:
+        pink_monster_x = pink_monster_x - vel_pink_monster * (dt/100)
+        anim_time_walkLeft = anim_time_walkLeft + dt
+        anim_time_walkLeft_set = anim_time_walkLeft/1000
+
+        if anim_time_walkLeft_set > 0.15:
+            frame_atual_walkLeft += 1
+            if frame_atual_walkLeft > 5:
+                frame_atual_walkLeft = 0
+            anim_time_walkLeft = 0
+
+        window.blit(walk_left, (pink_monster_x, pink_monster_y),((frame_atual_walkLeft * 32),0, 32, 32))          
+    
+    elif pular ==  True:
+        if anim_time_jump_set > 0.09:
+            frame_atual_jump += 1
+            if frame_atual_jump > 7:
+                frame_atual_jump = 0
+                
+            anim_time_jump = 0
+
+        #window.fill((255,255,255))
+        window.blit(jump, (pink_monster_x,pink_monster_y),((frame_atual_jump * 32), 0, 32,32))
+
+    else:
+        anim_time_idle = anim_time_idle + dt
+        anim_time_idle_set = anim_time_idle/1000
+
+        if anim_time_idle_set > 0.15:
+                    frame_atual_idle += 1
+                    if frame_atual_idle > 3:
+                        frame_atual_idle = 0
+                    anim_time_idle = 0
+
+
+        window.blit(idle,(pink_monster_x,pink_monster_y),((frame_atual_idle * 32), 0, 32,32))
+    
+
+
+
+    draw.rect(window,(0,225,0),pink_monster_collider,2)   
+    draw.rect(window,(0,0,255),(150,256,44,32),(2))
+    draw.rect(window,(0,0,255),(267,208,22,16),(2))
+    draw.rect(window,(0,0,255),(130,272,22,16),(2))
+    draw.rect(window,(0,0,255),(170,240,22,16),(2))
+
+    for obstaculo in obstaculos:
+        draw.rect(window,(255,0,0),obstaculo,2)
 
     display.update()
